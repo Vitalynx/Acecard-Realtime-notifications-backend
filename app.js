@@ -3,19 +3,23 @@ const http = require("http");
 const socketIo = require("socket.io");
 const axios = require("axios");
 const index = require("./routes/index");
-var redis = require('redis')
+const createCharge = require("./routes/createCharge");
+const updateCharge = require("./routes/updateCharge");
+const redis = require('redis')
 
-
-var client = redis.createClient({host: '199.247.8.9'})
+const client = redis.createClient({host: '199.247.8.9'})
 
 const app = express();
+app.use(express.json());       // to support JSON-encoded bodies
+app.use(express.urlencoded()); // to support URL-encoded bodies
 app.use(index);
+// app.use(updatesource);
+app.use(createCharge);
+app.use(updateCharge);
+
 const server = http.createServer(app);
 
-const io = socketIo(server); // < Interesting!
-// const getApiAndEmit = () => {
-//    console.log("emitting..")
-// };
+const io = socketIo(server);
 
 const getFromRedis = (socket) => {
    client.get('points', (error, value) => {
@@ -43,16 +47,11 @@ io.on("connection", socket => {
 //    }
 //  };
 
-// client.set('points', 50);
 
-// //get the value 
-// client.get('points', function(err, value) {
-//    if (err) {
-//     console.log(err);
-//    }
-//  console.log(value); //Return null
- 
-//  });
+// const pushAPIData = async () => {
+
+// }
 
 
-server.listen(8888, () => console.log(`Listening on port 8888`));
+
+server.listen(8000, () => console.log(`Listening on port 8000`));
