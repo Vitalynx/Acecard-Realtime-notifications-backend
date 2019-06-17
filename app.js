@@ -50,9 +50,13 @@ io.on("connection", socket => {
    );
 
    socket.on('disconnect', function () {
-      clearInterval(interval);
+        clearInterval(interval);
+        socket.disconnect();
+        socket.close();
    });
 });
+
+
 
 const getInitialData = (socket) => {
    client.lrange(uuid, 0, -1, (err, list) => {
