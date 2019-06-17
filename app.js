@@ -8,8 +8,8 @@ const updateCharge = require("./routes/updateCharge");
 const redis = require('redis');
 var jwtDecode = require('jwt-decode');
 
-// const client = redis.createClient({host: '199.247.8.9'})
-const client = redis.createClient({host: 'localhost'})
+const client = redis.createClient({host: '199.247.8.9'})
+// const client = redis.createClient({host: 'localhost'})
 
 const app = express();
 app.use(express.json());       // to support JSON-encoded bodies
@@ -26,11 +26,14 @@ const io = socketIo(server);
 var notifications = []
 var uuid;
 
+// var firstconnect;
+
 io.use((socket, next) => {
    var handshakeData = socket.request._query;
    try {
       uuid = jwtDecode(handshakeData.jwt).sub;
-      console.log("Succesfully got token and uuid: ", uuid)
+      console.log("Succesfully got token and uuid: ", uuid);
+      firstconnect = true;
       next();
    } catch (err) {
       throw err;
@@ -53,8 +56,10 @@ io.on("connection", socket => {
 
 const getInitialData = (socket) => {
    client.lrange(uuid, 0, -1, (err, list) => {
+         notifications["firstconnect"] = true;
          notifications = list.map(element => JSON.parse(element));
          socket.emit("event", notifications);
+         console.log(notifications);
          console.log("emitted initial data");
    });
 }
