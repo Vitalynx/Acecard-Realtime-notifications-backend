@@ -51,8 +51,6 @@ io.on("connection", socket => {
 
    socket.on('disconnect', function () {
         clearInterval(interval);
-        socket.disconnect();
-        socket.close();
    });
 });
 
