@@ -56,21 +56,21 @@ io.on("connection", socket => {
 
 
 
-const getInitialData = (socket) => {
+const getInitialData = () => {
    client.lrange(uuid, 0, -1, (err, list) => {
          notifications["firstconnect"] = true;
          notifications = list.map(element => JSON.parse(element));
-         socket.emit("event", notifications);
+         io.emit("event", notifications);
          console.log(notifications);
          console.log("emitted initial data");
    });
 }
 
-const getFromRedis = (socket) => {
+const getFromRedis = () => {
    client.lrange(uuid, 0, -1, (err, list) => {
       if (list.length !== notifications.length) {
          notifications = list.map(element => JSON.parse(element));
-         socket.emit("event", notifications);
+         io.emit("event", notifications);
          console.log("EMITTED EVENT");
          console.log(notifications[0]);
       }
