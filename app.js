@@ -5,9 +5,11 @@ const axios = require("axios");
 const index = require("./routes/index");
 const createCharge = require("./routes/createCharge");
 const updateCharge = require("./routes/updateCharge");
-const redis = require('redis')
+const redis = require('redis');
+var jwtDecode = require('jwt-decode');
 
-const client = redis.createClient({host: '199.247.8.9'})
+// const client = redis.createClient({host: '199.247.8.9'})
+const client = redis.createClient({host: 'localhost'})
 
 const app = express();
 app.use(express.json());       // to support JSON-encoded bodies
@@ -21,37 +23,53 @@ const server = http.createServer(app);
 
 const io = socketIo(server);
 
-const getFromRedis = (socket) => {
-   client.get('points', (error, value) => {
-      socket.emit("points", value);
-      console.log(value);
+var notifications = []
+var uuid;
+
+io.use((socket, next) => {
+   var handshakeData = socket.request._query;
+   try {
+      uuid = jwtDecode(handshakeData.jwt).sub;
+      console.log("Succesfully got token and uuid: ", uuid)
+      next();
+   } catch (err) {
+      throw err;
+   }
+})
+
+io.on("connection", socket => {
+   console.log("New client connected")
+
+   getInitialData(socket);
+   interval = setInterval(
+      () => getFromRedis(socket),
+      10
+   );
+
+   socket.on('disconnect', function () {
+      clearInterval(interval);
+   });
+});
+
+const getInitialData = (socket) => {
+   client.lrange(uuid, 0, -1, (err, list) => {
+         notifications = list.map(element => JSON.parse(element));
+         socket.emit("event", notifications);
+         console.log("emitted initial data");
    });
 }
 
-io.on("connection", socket => {
-   console.log("New client connected"), setInterval(
-     () => getFromRedis(socket),
-     100
-   );
-   socket.on("disconnect", () => console.log("Client disconnected"));
-});
-
-// const getApiAndEmit = async socket => {
-//    try {
-//      const res = await axios.get(
-//        "https://api.darksky.net/forecast/PUT_YOUR_API_KEY_HERE/43.7695,11.2558"
-//      ); // Getting the data from DarkSky
-//      socket.emit("FromAPI", res.data.currently.temperature); // Emitting a new message. It will be consumed by the client
-//    } catch (error) {
-//      console.error(`Error: ${error.code}`);
-//    }
-//  };
-
-
-// const pushAPIData = async () => {
-
-// }
-
-
+const getFromRedis = (socket) => {
+   client.lrange(uuid, 0, -1, (err, list) => {
+      if (list.length !== notifications.length) {
+         notifications = list.map(element => JSON.parse(element));
+         socket.emit("event", notifications);
+         console.log("EMITTED EVENT");
+         console.log(notifications[0]);
+      }
+   })
+}
 
 server.listen(8000, () => console.log(`Listening on port 8000`));
+
+
