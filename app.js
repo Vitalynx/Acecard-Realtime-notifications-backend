@@ -36,7 +36,7 @@ io.use((socket, next) => {
       firstconnect = true;
       next();
    } catch (err) {
-      throw err;
+      console.log(err);
    }
 })
 
