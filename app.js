@@ -44,7 +44,7 @@ io.use((socket, next) => {
       });   
       next();
    } catch (err) {
-      throw err;
+      console.log(err);
    }
 })
 
