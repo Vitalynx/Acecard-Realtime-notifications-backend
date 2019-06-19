@@ -5,7 +5,8 @@ const notification = {
     type: "notification",
     name: "deposit",
     amount: Math.floor(Math.random() * 350),
-    date: new Date()
+    updated_balance: Math.floor(Math.random() * 350),
+    datetime: new Date().toISOString()
 }
 
 var uuid = "884e13f3-3ae1-4399-bad4-4495af7bdfda"
@@ -13,6 +14,7 @@ var uuid = "884e13f3-3ae1-4399-bad4-4495af7bdfda"
 function randomDate(start, end) {
     return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
 }
+
 
 const sendEvent = (uuid, event) => {
     console.log(JSON.stringify(event))
@@ -26,4 +28,25 @@ const sendEvent = (uuid, event) => {
     })
 }
 
-sendEvent(uuid, notification);
+const updateFromLastNotification = (substract, amount) => {
+    client.lrange(uuid, 0, 1, (err, list) => {
+        console.log(list);
+        if(list.length) {
+            console.log("LIST IS NOT EMPTY");
+            var data = list.map(element => JSON.parse(element))[0];
+            var amountToAdd = amount ? amount : Math.floor(1 + Math.random() * 10);
+            notification.amount = amountToAdd;
+            notification.updated_balance = substract ? data.updated_balance - amountToAdd : data.updated_balance + amountToAdd;
+        }
+        sendEvent(uuid, notification);
+    })
+}
+
+
+updateFromLastNotification(false);
+
+// lastNotification = getFromRedis();
+// console.log("last:", lastNotification);
+// getFromRedis();
+    // sendEvent(uuid, notification);
+

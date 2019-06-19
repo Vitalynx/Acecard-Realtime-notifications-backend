@@ -28,12 +28,20 @@ var uuid;
 
 // var firstconnect;
 
+
 io.use((socket, next) => {
    var handshakeData = socket.request._query;
    try {
       uuid = jwtDecode(handshakeData.jwt).sub;
       console.log("Succesfully got token and uuid: ", uuid);
       firstconnect = true;
+      interval = setInterval(
+         () => getFromRedis(),
+         10
+      );
+      socket.on('disconnect', function () {
+         clearInterval(interval);
+      });   
       next();
    } catch (err) {
       throw err;
@@ -44,10 +52,7 @@ io.on("connection", socket => {
    console.log("New client connected")
 
    getInitialData(socket);
-   interval = setInterval(
-      () => getFromRedis(socket),
-      10
-   );
+
 
    socket.on('disconnect', function () {
         clearInterval(interval);
@@ -58,10 +63,8 @@ io.on("connection", socket => {
 
 const getInitialData = () => {
    client.lrange(uuid, 0, -1, (err, list) => {
-         notifications["firstconnect"] = true;
          notifications = list.map(element => JSON.parse(element));
          io.emit("event", notifications);
-         console.log(notifications);
          console.log("emitted initial data");
    });
 }
@@ -70,9 +73,9 @@ const getFromRedis = () => {
    client.lrange(uuid, 0, -1, (err, list) => {
       if (list.length !== notifications.length) {
          notifications = list.map(element => JSON.parse(element));
+         console.log("GOT NEW TRANSACTION FROM REDIS: ", notifications);
          io.emit("event", notifications);
          console.log("EMITTED EVENT");
-         console.log(notifications[0]);
       }
    })
 }
