@@ -60,18 +60,19 @@ const updateFromLastNotification = (substract, amount) => {
             console.log("LIST IS NOT EMPTY");
             var data = list.map(element => JSON.parse(element))[0];
             var amountToAdd = amount ? amount : Math.floor(1 + Math.random() * 10);
+            amountToAdd = parseFloat(amountToAdd);
             notification.amount = amountToAdd;
-            notification.updated_balance = substract ? data.updated_balance - amountToAdd : data.updated_balance + amountToAdd;
+            notification.updated_balance = substract ? parseFloat(data.updated_balance) - amountToAdd : parseFloat(data.updated_balance) + amountToAdd;
         }
         sendEvent(uuid, notification);
     })
 }
 
 
-updateFromLastNotification(false);
+// updateFromLastNotification(false);
 
 // lastNotification = getFromRedis();
 // console.log("last:", lastNotification);
 // getFromRedis();
-    // sendEvent(uuid, notification);
+    sendEvent(uuid, notification);
 
