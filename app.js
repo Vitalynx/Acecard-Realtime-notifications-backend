@@ -51,8 +51,6 @@ io.use((socket, next) => {
 io.on("connection", socket => {
    console.log("New client connected")
 
-   getInitialData(socket);
-
 
    socket.on('disconnect', function () {
         clearInterval(interval);
