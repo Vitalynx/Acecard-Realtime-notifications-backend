@@ -1,10 +1,7 @@
 const express = require("express");
 const http = require("http");
 const socketIo = require("socket.io");
-const axios = require("axios");
 const index = require("./routes/index");
-const createCharge = require("./routes/createCharge");
-const updateCharge = require("./routes/updateCharge");
 const redis = require('redis');
 var jwtDecode = require('jwt-decode');
 
@@ -14,8 +11,6 @@ const app = express();
 app.use(express.json());       // to support JSON-encoded bodies
 app.use(express.urlencoded()); // to support URL-encoded bodies
 app.use(index);
-app.use(createCharge);
-app.use(updateCharge);
 
 const server = http.createServer(app);
 
