@@ -1,5 +1,7 @@
+// This file is for testing notifications
+
 const redis = require('redis');
-const client = redis.createClient({ host: 'localhost'})
+const client = redis.createClient({ host: '52.174.62.193'})
 
 const notification = {
     type: "notification",
@@ -14,19 +16,6 @@ var uuid = "884e13f3-3ae1-4399-bad4-4495af7bdfda"
 const getFromRedis = () => {
     client.lrange(uuid, 0, -1, (err, list) => {
         var notifications = list.map(element => JSON.parse(element));
-
-        var oldbalance = notifications && notifications[0] && parseInt(notifications[0].updated_balance) - parseInt(notifications[0].amount)
-        var am = Math.floor(Math.random() * 100);
-        var notification = {
-            type: "notification",
-            name: "deposit",
-            amount: oldbalance,
-            updated_balance: oldbalance + am,
-            datetime: new Date()
-        }
-
-        sendEvent(uuid, notification);
-
     })
  }
 
@@ -49,7 +38,6 @@ const updateFromLastNotification = (substract, amount) => {
     client.lrange(uuid, 0, 1, (err, list) => {
         console.log(list);
         if(list.length) {
-            console.log("LIST IS NOT EMPTY");
             var data = list.map(element => JSON.parse(element))[0];
             var amountToAdd = amount ? amount : Math.floor(1 + Math.random() * 10);
             amountToAdd = parseFloat(amountToAdd);
@@ -61,10 +49,5 @@ const updateFromLastNotification = (substract, amount) => {
 }
 
 
-// updateFromLastNotification(false);
-
-// lastNotification = getFromRedis();
-// console.log("last:", lastNotification);
-// getFromRedis();
-    sendEvent(uuid, notification);
+getFromRedis();
 
