@@ -27,15 +27,16 @@ var uuid;
 io.use((socket, next) => {
    var handshakeData = socket.request._query;
    try {
-      uuid = jwtDecode(handshakeData.jwt).sub;
-      console.log("Succesfully got token and uuid: ", uuid);
-      interval = setInterval(
+     uuid = jwtDecode(handshakeData.jwt).sub;
+     console.log("Succesfully got token and uuid: ", uuid);
+     getInitialData();
+     interval = setInterval(
          () => getFromRedis(),
          10
       );
       socket.on('disconnect', function () {
          clearInterval(interval);
-      });   
+      });
       next();
    } catch (err) {
       console.log(err);
@@ -55,7 +56,7 @@ io.on("connection", socket => {
 const getInitialData = () => {
    client.lrange(uuid, 0, -1, (err, list) => {
          notifications = list.map(element => JSON.parse(element));
-         io.emit("event", notifications);
+         io.emit("init", notifications);
          console.log("emitted initial data");
    });
 }
