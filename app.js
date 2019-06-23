@@ -29,7 +29,6 @@ io.use((socket, next) => {
    try {
       uuid = jwtDecode(handshakeData.jwt).sub;
       console.log("Succesfully got token and uuid: ", uuid);
-      firstconnect = true;
       interval = setInterval(
          () => getFromRedis(),
          10
