@@ -8,14 +8,12 @@ const updateCharge = require("./routes/updateCharge");
 const redis = require('redis');
 var jwtDecode = require('jwt-decode');
 
-const client = redis.createClient({host: '199.247.8.9'})
-// const client = redis.createClient({host: 'localhost'})
+const client = redis.createClient({host: 'localhost'})
 
 const app = express();
 app.use(express.json());       // to support JSON-encoded bodies
 app.use(express.urlencoded()); // to support URL-encoded bodies
 app.use(index);
-// app.use(updatesource);
 app.use(createCharge);
 app.use(updateCharge);
 
@@ -25,9 +23,6 @@ const io = socketIo(server);
 
 var notifications = []
 var uuid;
-
-// var firstconnect;
-
 
 io.use((socket, next) => {
    var handshakeData = socket.request._query;
@@ -50,9 +45,7 @@ io.use((socket, next) => {
 
 io.on("connection", socket => {
    console.log("New client connected")
-
    getInitialData(socket);
-
 
    socket.on('disconnect', function () {
         clearInterval(interval);
